@@ -1,10 +1,10 @@
 //
 //  main.cpp
-//  oop_project
+//  237Projects
 //
-//  Created by 형성모 on 2018. 12. 21..
-//  Copyright © 2018년 hsm. All rights reserved.
+//  Created by 형성모 on 2018. 12. 26..
 //
+//  Banking System 입니다.
 
 #include <iostream>
 
