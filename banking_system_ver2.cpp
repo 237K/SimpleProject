@@ -14,16 +14,16 @@ using std::cin;
 using std::cout;
 using std::endl;
 
-//fuction protocol
+//Fuction Protocol
 void open_account(void);
-void DepositMoney(void);
-void WithdrawMoney(void);
+void DepositM(void);
+void WithdrawM(void);
 void view_balance(void);
 void print_menu(void);
 
 namespace MENU_SELECT
 {
-    enum {OPEN = 1, DEPOSIT, WITHDRAW, VIEW};
+    enum {OPEN = 1, DEPOSIT, WITHDRAW, VIEW, EXIT};
 }
 
 //Class 선언
@@ -34,16 +34,26 @@ private:
     char *name;
     int balance;
 public:
+    Customers(){}
+    Customers(const Customers &cus);
     Customers(int account, char *name, int balance);
     ~Customers();
-    int GetAccount() const;
+    int GetAccount();
     void deposit(int balance);
     int ShowBalance() const;
-    void withdraw(int balance);
+    int withdraw(int balance);
     char* ShowName() const;
 };
 
 //Class 함수 정의
+Customers::Customers(const Customers &cus)
+{
+    account = cus.account;
+    name = new char[strlen(cus.name)+1];
+    strcpy(name, cus.name);
+    balance = cus.balance;
+}
+
 Customers::Customers(int account, char *name, int balance)
 {
     this->account = account;
@@ -59,7 +69,7 @@ Customers::~Customers()
     cout<<"고객 정보에 대한 동적할당을 해제하였습니다."<<endl<<endl;
 }
 
-int Customers::GetAccount() const
+int Customers::GetAccount()
 {
     return this->account;
 }
@@ -74,9 +84,12 @@ int Customers::ShowBalance() const
     return this->balance;
 }
 
-void Customers::withdraw(int balance)
+int Customers::withdraw(int balance)
 {
+    if(this->balance < balance) return 0;
+    
     this->balance -= balance;
+    return this->balance;
 }
 
 char* Customers::ShowName() const
@@ -107,13 +120,13 @@ int main(void)
         {
             case MENU_SELECT::OPEN : open_account();
                 break;
-            case MENU_SELECT::DEPOSIT : DepositMoney();
+            case MENU_SELECT::DEPOSIT : DepositM();
                 break;
-            case MENU_SELECT::WITHDRAW : WithdrawMoney();
+            case MENU_SELECT::WITHDRAW : WithdrawM();
                 break;
             case MENU_SELECT::VIEW : view_balance();
                 break;
-            case 5 :
+            case MENU_SELECT::EXIT :
                 for(int i = 0; i < count; i++)
                 {
                     delete customer[i];
@@ -148,17 +161,18 @@ void open_account(void)
     cin>>customer_name;
     cout<<"입금금액 : ";
     cin>>open_balance;
+    cout<<endl;
     
     customer[count+1] = new Customers(account_num, customer_name, open_balance);
     
     count++;
 }
 
-void DepositMoney(void)
+void DepositM(void)
 {
     int temp_acc = 0, temp_bal = 0;
     
-    cout<<endl<<"*입금";
+    cout<<endl<<"[입   금]"<<endl;
     cout<<"계좌번호 : ";
     cin>>temp_acc;
     cout<<"입금금액 : ";
@@ -172,16 +186,17 @@ void DepositMoney(void)
         {
             customer[i]->deposit(temp_bal);
             cout<<endl<<"*입금 완료"<<endl;
-            break;
+            return;
         }
-        else cout<<"일치하는 계좌가 없습니다."<<endl;
     }
+    cout<<"일치하는 계좌가 없습니다."<<endl;
 }
 
-void WithdrawMoney(void)
+void WithdrawM(void)
 {
     int temp_acc = 0, temp_bal = 0;
     
+    cout<<endl<<"[출   금]"<<endl;
     cout<<"계좌번호 : ";
     cin>>temp_acc;
     cout<<"출금금액 : ";
@@ -193,13 +208,16 @@ void WithdrawMoney(void)
     {
         if(customer[i]->GetAccount() == temp_acc)
         {
-            if(customer[i]->ShowBalance() < temp_bal) cout<<"잔액이 충분하지 않습니다."<<endl;
-            
-            customer[i]->withdraw(temp_bal);
+            if(customer[i]->withdraw(temp_bal) == 0)
+            {
+                cout<<"잔액이 충분하지 않습니다."<<endl;
+                return;
+            }
             cout<<"*출금 완료"<<endl;
-            break;
+            return;
         }
     }
+    cout<<"일치하는 계좌가 없습니다."<<endl;
 }
           
 
