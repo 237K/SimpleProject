@@ -1,145 +1,118 @@
 //
-//  main.cpp
+//  Banking_System_ver2.cpp
 //  237Projects
 //
 //  Created by 형성모 on 2018. 12. 26..
 //
 //  Banking System 입니다.
 //  ver2. 구조체를 클래스로 변경하고, 기존의 배열을 포인터 배열로 변경하였으며 동적할당으로 메모리사용을 최적화하였습니다.
+//
 
 #include <iostream>
 #include <cstring>
 
-using std::cin;
 using std::cout;
+using std::cin;
 using std::endl;
 
-//Fuction Protocol
-void open_account(void);
-void DepositM(void);
-void WithdrawM(void);
-void view_balance(void);
-void print_menu(void);
+//전역변수
+const int NAME_LEN=20;
+int AccountNumberCount = 0;
 
-namespace MENU_SELECT
+//Fuction Protocol
+void ShowMenu(void);
+void OpenAccount(void);
+void DepositMoney(void);
+void WithdrawMoney(void);
+void ShowAllAccount(void);
+
+namespace MENU
 {
-    enum {OPEN = 1, DEPOSIT, WITHDRAW, VIEW, EXIT};
+enum {OPEN = 1, DEPOSIT, WITHDRAW, VIEW, EXIT};
 }
 
-//Class 선언
-class Customers
+//Class
+class Account
 {
 private:
-    int account;
-    char *name;
+    int accountID;
+    char *customer_name;
     int balance;
 public:
-    Customers(){}
-    Customers(const Customers &cus);
-    Customers(int account, char *name, int balance);
-    ~Customers();
-    int GetAccount();
-    void deposit(int balance);
-    int ShowBalance() const;
-    int withdraw(int balance);
-    char* ShowName() const;
+    Account(int account, char *name, int money) :accountID(account), balance(money)
+    {
+        customer_name = new char[strlen(name)+1];
+        strcpy(customer_name, name);
+    }
+    int GetAccount() const
+    {
+        return accountID;
+    }
+    void Deposit(int money)
+    {
+        balance += money;
+    }
+    int Withdraw(int money)
+    {
+        if(balance < money) return 0;
+        balance -= money;
+        return money;
+    }
+    void ShowAccount() const
+    {
+        cout<<"계좌번호 : "<<accountID<<endl;
+        cout<<"이   름 : "<<customer_name<<endl;
+        cout<<"잔   액 : "<<balance<<endl;
+    }
+    ~Account()
+    {
+        delete []customer_name;
+    }
 };
 
-//Class 함수 정의
-Customers::Customers(const Customers &cus)
-{
-    account = cus.account;
-    name = new char[strlen(cus.name)+1];
-    strcpy(name, cus.name);
-    balance = cus.balance;
-}
-
-Customers::Customers(int account, char *name, int balance)
-{
-    this->account = account;
-    this->name = new char[strlen(name)+1];
-    strcpy(this->name, name);
-    this->balance = balance;
-    cout<<"새로운 고객의 계좌 생성을 완료하였습니다!"<<endl<<endl;
-}
-
-Customers::~Customers()
-{
-    delete []name;
-    cout<<"고객 정보에 대한 동적할당을 해제하였습니다."<<endl<<endl;
-}
-
-int Customers::GetAccount()
-{
-    return this->account;
-}
-
-void Customers::deposit(int balance)
-{
-    this->balance += balance;
-}
-
-int Customers::ShowBalance() const
-{
-    return this->balance;
-}
-
-int Customers::withdraw(int balance)
-{
-    if(this->balance < balance) return 0;
-    
-    this->balance -= balance;
-    return this->balance;
-}
-
-char* Customers::ShowName() const
-{
-    return this->name;
-}
-
-    
-//전역변수 선언
-const int NAME_LEN = 20;
-int count = 0;
-Customers *customer[100];
+Account *customer[100] = {NULL};
 
 //main
 int main(void)
 {
-    
-    int select_num = 0;
+    int Select = 0;
     
     while(1)
     {
-        print_menu();
+        ShowMenu();
         cout<<endl<<"메뉴를 선택해주세요.";
-        cin>>select_num;
+        cin>>Select;
         cout<<endl;
-
-        switch (select_num)
+        
+        switch(Select)
         {
-            case MENU_SELECT::OPEN : open_account();
+            case MENU::OPEN:
+                OpenAccount();
                 break;
-            case MENU_SELECT::DEPOSIT : DepositM();
+            case MENU::DEPOSIT:
+                DepositMoney();
                 break;
-            case MENU_SELECT::WITHDRAW : WithdrawM();
+            case MENU::WITHDRAW:
+                WithdrawMoney();
                 break;
-            case MENU_SELECT::VIEW : view_balance();
+            case MENU::VIEW:
+                ShowAllAccount();
                 break;
-            case MENU_SELECT::EXIT :
-                for(int i = 0; i < count; i++)
+            case MENU::EXIT:
+                for(int i = 0; i < AccountNumberCount; i++)
                 {
                     delete customer[i];
                 }
                 return 0;
-            default :
+            default:
                 cout<<"다시 번호를 입력해주세요."<<endl;
         }
     }
     return 0;
 }
 
-void print_menu(void)
+//함수 정의
+void ShowMenu(void)
 {
     cout<<"-----Menu-----"<<endl;
     cout<<"1. 계좌개설"<<endl;
@@ -149,88 +122,81 @@ void print_menu(void)
     cout<<"5. 프로그램 종료"<<endl;
 }
 
-void open_account(void)
+void OpenAccount(void)
 {
-    int account_num, open_balance;
-    char customer_name[NAME_LEN];
+    int myaccount = 0, mymoney = 0;
+    char myname[NAME_LEN];
     
-    cout<<"[개좌개설]"<<endl;
+    cout<<"[계좌개설]"<<endl;
     cout<<"계좌번호 : ";
-    cin>>account_num;
+    cin>>myaccount;
     cout<<"이   름 : ";
-    cin>>customer_name;
+    cin>>myname;
     cout<<"입금금액 : ";
-    cin>>open_balance;
+    cin>>mymoney;
     cout<<endl;
     
-    customer[count+1] = new Customers(account_num, customer_name, open_balance);
+    customer[AccountNumberCount++] = new Account(myaccount, myname, mymoney);
+    cout<<"계좌가 성공적으로 개설되었습니다."<<endl<<endl;
     
-    count++;
+    AccountNumberCount++;
 }
 
-void DepositM(void)
+void DepositMoney(void)
 {
-    int temp_acc = 0, temp_bal = 0;
+    int myaccount = 0, money = 0;
     
-    cout<<endl<<"[입   금]"<<endl;
+    cout<<"[입   금]"<<endl;
     cout<<"계좌번호 : ";
-    cin>>temp_acc;
+    cin>>myaccount;
     cout<<"입금금액 : ";
-    cin>>temp_bal;
+    cin>>money;
+    cout<<endl;
     
-    if(temp_bal < 0) cout<<"0원 이상의 금액을 입력하여 주십시오."<<endl;
-    
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < AccountNumberCount; i++)
     {
-        if(customer[i]->GetAccount() == temp_acc)
+        if(customer[i]->GetAccount() == myaccount)
         {
-            customer[i]->deposit(temp_bal);
-            cout<<endl<<"*입금 완료"<<endl;
+            customer[i]->Deposit(money);
+            cout<<"*입금완료"<<endl;
             return;
         }
     }
-    cout<<"일치하는 계좌가 없습니다."<<endl;
+    cout<<"일치하는 계좌정보가 없습니다."<<endl;
 }
 
-void WithdrawM(void)
+void WithdrawMoney(void)
 {
-    int temp_acc = 0, temp_bal = 0;
+    int myaccount = 0, money = 0;
     
-    cout<<endl<<"[출   금]"<<endl;
+    cout<<"[출   금]"<<endl;
     cout<<"계좌번호 : ";
-    cin>>temp_acc;
+    cin>>myaccount;
     cout<<"출금금액 : ";
-    cin>>temp_bal;
+    cin>>money;
+    cout<<endl;
     
-    if(temp_bal < 0) cout<<"0원 이상의 금액을 입력하여 주십시오."<<endl;
-
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < AccountNumberCount; i++)
     {
-        if(customer[i]->GetAccount() == temp_acc)
+        if(customer[i]->GetAccount() == myaccount)
         {
-            if(customer[i]->withdraw(temp_bal) == 0)
+            if(customer[i]->Withdraw(money) == 0)
             {
-                cout<<"잔액이 충분하지 않습니다."<<endl;
+                cout<<"잔액이 부족합니다."<<endl;
                 return;
             }
-            cout<<"*출금 완료"<<endl;
+            cout<<"*출금완료"<<endl<<endl;
             return;
         }
     }
-    cout<<"일치하는 계좌가 없습니다."<<endl;
+    cout<<"일치하는 계좌정보가 없습니다."<<endl;
 }
-          
 
-void view_balance(void)
+void ShowAllAccount(void)
 {
-    cout<<"전체 계좌 수 : "<<count<<endl;
-    
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < AccountNumberCount; i++)
     {
-        cout<<"--------------------"<<endl;
-        cout<<"계좌번호 : "<<customer[i]->GetAccount()<<endl;
-        cout<<"이   름 : "<<customer[i]->ShowName()<<endl;
-        cout<<"잔   액 : "<<customer[i]->ShowBalance()<<endl;
-        cout<<"--------------------"<<endl;
+        customer[i]->ShowAccount();
+        cout<<endl;
     }
 }
