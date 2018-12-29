@@ -109,7 +109,7 @@ public:
 NormalAccount::NormalAccount(int account, char *name, int money, int interest) :Account(account, name, money), interest_ratio(interest) {}
 int NormalAccount::GetBasicInterest(int money)
 {
-    return (int)((Account::GetBalance() + money) * (interest_ratio/100.0));
+    return (Account::GetBalance() + money) * (interest_ratio/100.0);
 }
 void NormalAccount::Deposit(int money)
 {
@@ -127,7 +127,7 @@ void NormalAccount::ShowAccount() const
     cout<<"기본이자율 : "<<interest_ratio<<endl<<endl;
 }
 
-//고금리 신용계좌 클래스(Derived class) 선언
+//우대금리 신용계좌 클래스(Derived class) 선언
 class HighCreditAccount : public NormalAccount
 {
 private:
@@ -141,12 +141,12 @@ public:
     ~HighCreditAccount() {}
 };
 
-//고금리 신용계좌 클래스(Derived class) 정의
+//우대금리 신용계좌 클래스(Derived class) 정의
 HighCreditAccount::HighCreditAccount(int account, char *name, int money, int interest, int credit) :NormalAccount(account, name, money, interest), credit_level(credit) {}
     
 int HighCreditAccount::GetAdditionalInterest(int money)
 {
-    return (int)((Account::GetBalance() + money) * (credit_level/100.0));
+    return (Account::GetBalance() + money) * (credit_level/100.0);
 }
 void HighCreditAccount::Deposit(int money)
 {
